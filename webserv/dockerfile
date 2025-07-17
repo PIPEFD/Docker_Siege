@@ -1,0 +1,46 @@
+# FROM debian:bookworm-slim
+
+# RUN apt-get update && \
+#     apt-get install -y siege curl && \
+#     apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# WORKDIR /app
+
+# # Copia el binario, el conf y el archivo de siege
+# COPY ./webserv ./webserv
+# COPY ./default.conf ./default.conf
+# COPY ./siege.conf /root/.siege/siege.conf
+# COPY ./entrypoint.sh /entrypoint.sh
+# COPY ./www ./www
+# RUN chmod +x /entrypoint.sh
+
+# EXPOSE 8081
+
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y \
+build-essential \
+valgrind \
+gdb \
+nano \
+curl \
+&& apt-get clean \
+&& rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+
+COPY webserv ./webserv
+COPY default.conf ./default.conf
+COPY ./webserv ./webserv
+COPY ./www ./www
+COPY ./default.conf ./default.conf
+COPY ./entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+# COPY ./siege.conf /root/.siege/siege.conf
+
+EXPOSE 8081
+EXPOSE 8082
+
+# CMD ["valgrind", "./webserv", "default.conf"]
+CMD ["/entrypoint.sh"]
