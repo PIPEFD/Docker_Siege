@@ -1,14 +1,23 @@
-#!/bin/bash
+#!/bin/sh
+set -e
 
-echo "🧠 Lanzando Webserv con Valgrind..."
-mkdir -p /logs
-# valgrind --track-origins=yes --leak-check=full ./webserv default.conf 2> /logs/valgrind.log
-timeout 60s valgrind --track-origins=yes --leak-check=full ./webserv default.conf > /logs/valgrind.log 2>&1
+VALGRIND_LOG="/tmp/valgrind.log"
 
-echo "⏳ Esperando a que el servidor esté disponible en http://localhost:8081 ..."
-while ! curl -s http://localhost:8081 > /dev/null; do
-    sleep 1
-done
-echo "✅ Servidor activo, comenzando test con Siege"
+echo "[webserv] 🚀 Iniciando Valgrind…"
+valgrind \
+  --tool=memcheck \
+  --leak-check=full \
+  --track-origins=yes \
+  --show-leak-kinds=all \
+  --error-exitcode=42 \
+  --log-file="$VALGRIND_LOG" \
+  ./webserv default.conf
 
-wait $PID
+echo
+echo "[webserv] 📋 Resumen de fugas de memoria:"
+grep "definitely lost" "$VALGRIND_LOG"
+grep "ERROR SUMMARY" "$VALGRIND_LOG"
+echo
+
+# Para dejar el contenedor vivo y permita docker logs -f
+tail -f /dev/null

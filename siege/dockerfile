@@ -1,10 +1,14 @@
-FROM debian:bookworm-slim
+FROM ubuntu:22.04
 
+# Instala siege
+RUN apt-get update && \
+    apt-get install -y siege && \
+    apt-get clean
 
-RUN apt-get update && apt-get install -y siege curl && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+# Copia configuración personalizada y el script de entrada
+RUN mkdir -p /root/.siege
+COPY entrypoint.sh /entrypoint.sh
 
+RUN chmod +x /entrypoint.sh
 
-COPY siege.conf /root/.siege/siege.conf
-
-WORKDIR /app
+ENTRYPOINT ["/entrypoint.sh"]

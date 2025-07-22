@@ -1,10 +1,11 @@
+version: "3.8"
+
 services:
   webserv:
     build: ./webserv
     container_name: webserv
-    expose:
-      - "8081"
-      - "8082"
+    ports:
+      - "8081:8081"
     networks:
       - webserv_net
     volumes:
@@ -12,26 +13,20 @@ services:
 
   siege:
     build: ./siege
+    deploy:
+      resources:
+        limits:
+          memory: 2G
     container_name: siege
     depends_on:
       - webserv
     networks:
       - webserv_net
-    entrypoint: >
-      /bin/bash -c "
-        echo '[+] Esperando a que webserv esté disponible...';
-        until curl -s http://webserv:8081 > /dev/null; do sleep 1; done;
-        echo '[+] Webserv activo, lanzando pruebas de carga...';
-        siege -c 5 -t30S http://webserv:8081
-        siege -c 5 -t30S http://webserv:8082"
-
-    tty: true
 
 networks:
   webserv_net:
-    name: webserv_net
     driver: bridge
-    external: false
+
 
 # docker-compose up -d --build   
 # docker logs siege
