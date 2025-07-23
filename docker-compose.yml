@@ -16,7 +16,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 2G
+          memory: 1G
     container_name: siege
     depends_on:
       - webserv

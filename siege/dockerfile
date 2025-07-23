@@ -2,7 +2,7 @@ FROM ubuntu:22.04
 
 # Instala siege
 RUN apt-get update && \
-    apt-get install -y siege && \
+    apt-get install -y siege curl && \
     apt-get clean
 
 # Copia configuración personalizada y el script de entrada
